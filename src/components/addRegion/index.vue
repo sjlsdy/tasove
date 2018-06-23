@@ -1,14 +1,13 @@
 <template>
 	<div>
-		{{data}}=={{type}}
 		<Form :model="formItem" :label-width="80">
 			<FormItem label="父级ID">
 				<Input v-model="formItem.parentId" placeholder="" :disabled="true"></Input>
 			</FormItem>
 			<FormItem label="父级">
 				<span>{{formItem.parentName}}</span>
-				<Select v-model="formItem.parentName" style="width:100%;">
-					<Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+				<Select v-model="formItem.parentId" style="width:100%;">
+					<Option v-for="item in parentData" :value="item.id" :key="item.id">{{ item.name }}</Option>
 				</Select>
 			</FormItem>
 			<FormItem label="ID">
@@ -46,11 +45,11 @@
 					name: this.data.name,
 					aliasName: this.data.aliasName,
 				},
-				cityList: [{
-					value: 'New York',
-					label: 'New York'
-				}, ]
+				parentData: [],
 			}
+		},
+		mounted() {
+			this.getParentData();
 		},
 		methods: {
 			ok() {
@@ -101,6 +100,22 @@
 					}
 				}).catch(res => {
 					_self.loading = false;
+					_self.$Message.error('请求失败：' + res);
+				});
+			},
+			getParentData() {
+				let _self = this;
+				_self.parentData = [];
+				this.$http({
+					method: 'get',
+					url: '/index.php?m=admin&c=region&a=thelist'
+				}).then(function(res) {
+					if(res.data.status == 0) {
+						_self.parentData = res.data.data;
+					} else {
+						_self.$Message.error(res.data.message);
+					}
+				}).catch(res => {
 					_self.$Message.error('请求失败：' + res);
 				});
 			},
